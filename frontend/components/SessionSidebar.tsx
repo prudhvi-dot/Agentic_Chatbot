@@ -3,15 +3,26 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { PlusIcon, Loader2Icon, Trash2 } from "lucide-react";
-import { Button } from "./ui/button";
+import {
+  PlusIcon,
+  Loader2Icon,
+  Trash2,
+  UserIcon,
+} from "lucide-react";
+import { LogoutButton } from "./LogoutButton";
 
 type Session = {
   id: string;
   title: string;
 };
 
-export function SessionSidebar({ sessions }: { sessions: Session[] }) {
+export function SessionSidebar({
+  sessions,
+  userName
+}: {
+  sessions: Session[];
+  userName: string;
+}) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -21,9 +32,20 @@ export function SessionSidebar({ sessions }: { sessions: Session[] }) {
   function handleNewChat() {
     const chatId = crypto.randomUUID();
     router.push(`/chat/${chatId}`);
+    router.refresh();
   }
 
+  function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
   async function handleDeleteChat(sessionId: string) {
+    const isCurrentChat = pathname === `/chat/${sessionId}`;
     setDeletingId(sessionId);
     setError(null);
 
@@ -41,7 +63,9 @@ export function SessionSidebar({ sessions }: { sessions: Session[] }) {
         return;
       }
 
-      router.push("/chat");
+      if (isCurrentChat) {
+        router.push("/chat");
+      }
       router.refresh();
     } catch {
       setError("Something went wrong. Please try again.");
@@ -51,71 +75,146 @@ export function SessionSidebar({ sessions }: { sessions: Session[] }) {
   }
 
   return (
-    <aside className="w-64 shrink-0 border-r flex flex-col h-full">
-      <div className="p-3">
-        <Button
+    <aside className="flex h-full w-[260px] shrink-0 flex-col border-r border-border bg-sidebar text-sidebar-foreground">
+
+      {/* ==================================================
+          TOP
+      ================================================== */}
+
+      
+
+      <div className="px-2 py-3">
+
+        {/* New Chat */}
+
+        <div className="mb-2 flex items-center justify-between px-3">
+
+        <h1>Agentic Chatbot</h1>
+        </div>
+
+        <button
+          type="button"
           onClick={handleNewChat}
-          className="w-full justify-start gap-2"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors hover:bg-sidebar-accent"
         >
-          <PlusIcon className="h-4 w-4" />
-          New chat
-        </Button>
+          <PlusIcon className="h-[18px] w-[18px] shrink-0" />
+
+          <span>New chat</span>
+        </button>
+
       </div>
 
-      <nav className="flex-1 min-h-0 overflow-y-auto px-2 space-y-1">
+      {/* ==================================================
+          CHAT HISTORY
+      ================================================== */}
+
+      <div className="px-2 pb-2">
+
+        <p className="px-3 py-2 text-xs font-medium text-muted-foreground">
+          Chats
+        </p>
+
+      </div>
+
+      <nav className="min-h-0 flex-1 overflow-y-auto px-2">
+
         {error && (
-          <p className="px-2 py-2 text-sm text-destructive">
+          <p className="px-3 py-2 text-xs text-destructive">
             {error}
           </p>
         )}
 
         {sessions.length === 0 ? (
-          <p className="text-sm text-muted-foreground px-2 py-4">
+          <p className="px-3 py-4 text-sm text-muted-foreground">
             No chats yet.
           </p>
         ) : (
-          sessions.map((session) => {
-            const isActive = pathname === `/chat/${session.id}`;
-            const isDeleting = deletingId === session.id;
+          <div className="space-y-0.5">
 
-            return (
-              <div
-                key={session.id}
-                className={`group flex items-center rounded-md ${
-                  isActive
-                    ? "bg-muted font-medium"
-                    : "hover:bg-muted/50"
-                }`}
-              >
-                <Link
-                  href={`/chat/${session.id}`}
-                  className="min-w-0 flex-1 px-3 py-2 text-sm truncate"
-                >
-                  {session.title}
-                </Link>
+            {sessions.map((session) => {
+              const isActive =
+                pathname === `/chat/${session.id}`;
 
-                <button
-                  type="button"
-                  disabled={deletingId !== null}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleDeleteChat(session.id);
-                  }}
-                  className="mr-2 rounded p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100 disabled:pointer-events-none disabled:opacity-50"
-                  aria-label={`Delete ${session.title}`}
+              const isDeleting =
+                deletingId === session.id;
+
+              return (
+                <div
+                  key={session.id}
+                  className={`group relative flex min-w-0 items-center rounded-lg transition-colors ${
+                    isActive
+                      ? "bg-sidebar-accent"
+                      : "hover:bg-sidebar-accent/70"
+                  }`}
                 >
-                  {isDeleting ? (
-                    <Loader2Icon className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
-            );
-          })
+
+                  {/* Chat */}
+
+                  <Link
+                    href={`/chat/${session.id}`}
+                    className="min-w-0 flex-1 truncate px-3 py-2.5 text-[13px]"
+                  >
+                    {session.title}
+                  </Link>
+
+                  {/* Delete */}
+
+                  <button
+                    type="button"
+                    disabled={deletingId !== null}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDeleteChat(session.id);
+                    }}
+                    className="mr-1.5 rounded-md p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-sidebar-accent hover:text-foreground group-hover:opacity-100 disabled:pointer-events-none disabled:opacity-50"
+                    aria-label={`Delete ${session.title}`}
+                  >
+                    {isDeleting ? (
+                      <Loader2Icon className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </button>
+
+                </div>
+              );
+            })}
+
+          </div>
         )}
+
       </nav>
+
+       <div className="border-t border-border p-2">
+
+        <div className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-sidebar-accent">
+
+          {/* User Icon */}
+
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sidebar-accent text-xs font-medium">
+            {userName ? (
+              getInitials(userName)
+            ) : (
+              <UserIcon className="h-4 w-4" />
+            )}
+          </div>
+
+          {/* Username */}
+
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium">
+              {userName}
+            </p>
+          </div>
+
+          {/* Logout */}
+
+          <LogoutButton />
+
+        </div>
+        </div>
+
     </aside>
   );
 }

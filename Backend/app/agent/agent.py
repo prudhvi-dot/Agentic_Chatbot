@@ -100,7 +100,7 @@ def get_chatbot():
     graph.add_conditional_edges("chat_node", tools_condition)
     graph.add_edge("tools", "chat_node")
 
-    return graph.compile(checkpointer=checkpointer)
+    return graph.compile(checkpointer=checkpointer), checkpointer
 
 
-chatbot = get_chatbot()
+chatbot, checkpointer = get_chatbot()
