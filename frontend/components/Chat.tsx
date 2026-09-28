@@ -872,7 +872,6 @@ const Chat = ({
         </div>
       </div>
 
-
       {error && (
         <div className="mx-auto w-full max-w-3xl px-4 pb-2 sm:px-6">
           <p className="text-sm text-destructive">
