@@ -8,7 +8,7 @@ An agentic chat assistant that decides for itself when to search the web, look i
 
 ## What this project is for
 
-DocuSense, my other project, is built around a fixed pipeline: retrieve, grade, generate, verify, with every branch decided in advance. DeepScout is the deliberate opposite. There's no pipeline here — one agent, bound to a set of tools, decides at runtime whether it needs to search, which tool to use, how many times to call it, and when it has enough to answer. The two projects together are meant to show both sides of RAG/agent engineering: a system where the flow is fixed and verifiable, and one where the model controls its own flow.
+DocuSense, my other project, is built around a fixed pipeline: retrieve, grade, generate, verify, with every branch decided in advance. Agentic Chatbot is the deliberate opposite. There's no pipeline here — one agent, bound to a set of tools, decides at runtime whether it needs to search, which tool to use, how many times to call it, and when it has enough to answer. The two projects together are meant to show both sides of RAG/agent engineering: a system where the flow is fixed and verifiable, and one where the model controls its own flow.
 
 ## Features
 
