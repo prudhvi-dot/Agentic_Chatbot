@@ -1,4 +1,4 @@
-# DeepScout
+# Agentic Chatbot
 
 An agentic chat assistant that decides for itself when to search the web, look inside your uploaded documents, or pull a live stock price — and can chain several of those together before answering.
 
