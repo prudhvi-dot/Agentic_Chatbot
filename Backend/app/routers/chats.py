@@ -157,6 +157,15 @@ def send_message(
                 detail="Could not process that file.",
             )
 
+    def chat_has_docs(chat_id: str) -> bool:
+        try:
+            stats = get_pinecone_index().describe_index_stats()
+            ns = stats.namespaces.get(chat_id)
+            return bool(ns and ns.vector_count > 0)
+        except Exception as e:
+            print("has_docs check failed:", e)
+            return bool(file)  # fall back to: was a file attached in this request
+
     # File-only path: no question to answer, so skip the graph entirely
     if not message:
         confirmation = (
@@ -206,7 +215,12 @@ def send_message(
         try:
             for stream_mode, payload in chatbot.stream(
                 {"messages": [HumanMessage(content=message)]},
-                config={"configurable": {"thread_id": chat_id}},
+                config={
+                    "configurable": {
+                        "thread_id": chat_id,
+                        "has_docs": chat_has_docs(chat_id),
+                    }
+                },
                 stream_mode=["messages", "updates"],
             ):
                 if stream_mode == "updates":

@@ -1,7 +1,9 @@
+from datetime import datetime
 from typing import Annotated, TypedDict
 
 from dotenv import load_dotenv
 from langchain_core.messages import BaseMessage, SystemMessage
+from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
 from langchain_tavily import TavilySearch
 from langgraph.checkpoint.postgres import PostgresSaver
@@ -16,6 +18,8 @@ from app.Rag.retrieve import retrieve_context
 load_dotenv()
 
 llm = ChatOpenAI(model="gpt-4o-mini", api_key=settings.OPENAI_API_KEY)
+
+current_date = datetime.now().strftime("%B %d, %Y")
 
 
 class ChatState(TypedDict):
@@ -35,10 +39,29 @@ tools = [search_tool, retrieve_context]
 llm_with_tools = llm.bind_tools(tools)
 
 
-def chat_node(state: ChatState):
+def chat_node(state: ChatState, config: RunnableConfig):
+
+    has_docs = config.get("configurable", {}).get("has_docs", False)
+
+    if has_docs:
+        doc_note = (
+            "DOCUMENT STATUS: The user HAS uploaded a document to this chat. "
+            "Words like 'the story', 'the text', 'this', 'it', 'the author', "
+            "'the moral', 'the characters' refer to that document unless the "
+            f"user clearly asks about something else. Call `{retrieve_context.name}` "
+            "BEFORE answering or asking for clarification. "
+            "Never ask which story or document they mean.\n\n"
+        )
+    else:
+        doc_note = (
+            "DOCUMENT STATUS: No document is uploaded in this chat. If the user asks "
+            "about a document, tell them to upload it.\n\n"
+        )
 
     system_message = SystemMessage(
         content=(
+            f"Current date: {current_date}.\n\n"
+            f"{doc_note}\n\n"
             "You are a helpful Agentic Chatbot with access to several tools.\n\n"
             "Tool usage instructions:\n"
             "- Use `retrieve_context` whenever the user's question is about "
