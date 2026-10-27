@@ -7,7 +7,7 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "DocuSense",
+  title: "Agentic Chatbot",
   description: "AI-powered document assistant",
 };
 

@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 origins = [
-    "https://docu-sense-2-0-wowt.vercel.app/",
+    "https://agentic-chatbot-swart.vercel.app/",
 ]
 
 app.add_middleware(
